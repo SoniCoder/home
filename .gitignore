@@ -1,0 +1,26 @@
+# Frontend only service
+node_modules/
+dist/
+.cache/
+test-results/
+playwright-report/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build logs
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
