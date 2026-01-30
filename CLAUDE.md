@@ -94,6 +94,7 @@ For every code change, you MUST:
 - Test landing page, authenticated dashboard, app grid
 - Tests must pass before work is complete
 - Run from root: `docker compose -f docker-compose.test.yml up --abort-on-container-exit`
+- Feel free to create admin users/tokens for testing purposes if required
 
 ### 3. Documentation Updates (Required)
 - Update this file if routes or components change
