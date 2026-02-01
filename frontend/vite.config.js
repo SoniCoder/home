@@ -20,6 +20,9 @@ export default defineConfig({
       'shizuha-shizuha-home-frontend',
       'shizuha-shizuha-home-frontend.shizuha.svc.cluster.local',
       '.svc.cluster.local',
+      'shizuha.com',
+      'erp.shizuha.com',
+      'staging.shizuha.com',
     ],
     // HMR configuration for different environments
     hmr: process.env.VITE_HMR_DISABLE === 'true' ? false : {

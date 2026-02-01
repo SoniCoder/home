@@ -6,6 +6,7 @@ import {
   Mail,
   Cloud,
   UserCircle,
+  Building2,
   ArrowRight,
 } from 'lucide-react'
 import { cn } from '../utils/cn'
@@ -18,6 +19,7 @@ const ICON_MAP = {
   Mail,
   Cloud,
   UserCircle,
+  Building2,
 }
 
 // Apps available to authenticated users
@@ -69,6 +71,14 @@ const APPS = [
     path: '/scs/',
     icon: 'Cloud',
     bgColor: 'bg-purple-500',
+  },
+  {
+    id: 'admin',
+    name: 'Admin',
+    description: 'Organization & HR',
+    path: '/admin/',
+    icon: 'Building2',
+    bgColor: 'bg-teal-500',
   },
   {
     id: 'account',
