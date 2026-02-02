@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import LandingPage from './pages/LandingPage'
 import HomePage from './pages/HomePage'
+import { ShizuhaChatWidget } from './components/chat'
 
 function LoadingSpinner() {
   return (
@@ -25,10 +26,21 @@ function ConditionalHome() {
 }
 
 export default function App() {
+  const { isAuthenticated } = useAuth()
+
   return (
-    <Routes>
-      <Route path="/" element={<ConditionalHome />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<ConditionalHome />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      {isAuthenticated && (
+        <ShizuhaChatWidget
+          sourceService="home"
+          welcomeMessage="Hello! I'm your Shizuha assistant. I can help you navigate the platform and answer questions."
+          showToolCalls={true}
+        />
+      )}
+    </>
   )
 }

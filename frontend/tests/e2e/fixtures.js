@@ -26,8 +26,8 @@ const USER_KEY = 'shizuha_user'
 export const test = base.extend({
   // Authenticated page fixture - logs in via Shizuha ID
   authenticatedPage: async ({ page }, use) => {
-    // Go to Shizuha ID login page with next parameter
-    await page.goto('/id/login?next=/home/')
+    // Go to Shizuha ID login page with continue parameter
+    await page.goto('/id/login?continue=/')
 
     // Wait for form to be ready
     await page.waitForSelector('input[id="username"]', { timeout: 10000 })

@@ -84,7 +84,7 @@ test.describe('Authentication', () => {
 
     test('should login with valid credentials and show dashboard', async ({ page }) => {
       // Start at Shizuha ID login with next parameter
-      await page.goto('/id/login?next=/home/')
+      await page.goto('/id/login?continue=/')
 
       // Wait for form to be ready
       await page.waitForSelector('input[id="username"]', { timeout: 10000 })

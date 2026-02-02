@@ -5,6 +5,13 @@ import {
   Package,
   Mail,
   Cloud,
+  Users,
+  HardDrive,
+  Wallet,
+  Calculator,
+  UserCog,
+  Clock,
+  Bot,
 } from 'lucide-react'
 import { cn } from '../utils/cn'
 
@@ -15,6 +22,13 @@ const ICON_MAP = {
   Package,
   Mail,
   Cloud,
+  Users,
+  HardDrive,
+  Wallet,
+  Calculator,
+  UserCog,
+  Clock,
+  Bot,
 }
 
 export default function ProductCard({ product, isAuthenticated = false }) {
