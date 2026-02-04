@@ -14,8 +14,8 @@
 
 | URL | Description |
 |-----|-------------|
-| `http://localhost:8080/` | Landing page (unauthenticated) |
-| `http://localhost:8080/` | Dashboard with app grid (authenticated) |
+| `http://localhost/` | Landing page (unauthenticated) |
+| `http://localhost/` | Dashboard with app grid (authenticated) |
 
 ## Features
 
@@ -56,10 +56,6 @@ cd compose && docker compose up -d shizuha-home
 # View logs
 cd compose && docker compose logs -f shizuha-home
 
-# Production (K3s) - DO NOT USE DURING DEVELOPMENT
-helm upgrade --install shizuha-home deploy/k3s/charts/shizuha-home \
-  -f deploy/k3s/charts/shizuha-home/values.yaml \
-  -f deploy/k3s/charts/shizuha-home/values-local.yaml
 ```
 
 ## Tech Stack
