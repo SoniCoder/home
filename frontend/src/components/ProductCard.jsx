@@ -12,6 +12,9 @@ import {
   UserCog,
   Clock,
   Bot,
+  MessageCircle,
+  Building2,
+  UserCircle,
 } from 'lucide-react'
 import { cn } from '../utils/cn'
 
@@ -29,10 +32,13 @@ const ICON_MAP = {
   UserCog,
   Clock,
   Bot,
+  MessageCircle,
+  Building2,
+  UserCircle,
 }
 
 export default function ProductCard({ product, isAuthenticated = false }) {
-  const IconComponent = ICON_MAP[product.icon]
+  const IconComponent = ICON_MAP[product.icon] || Bot
 
   const handleClick = () => {
     if (isAuthenticated) {
