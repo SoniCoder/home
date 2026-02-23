@@ -94,7 +94,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <span className="shzc-text-sm shzc-font-bold">S</span>
           </div>
           <div>
-            <h3 className="shzc-font-semibold shzc-text-sm">Shizuha Assistant</h3>
+            <h3 className="shzc-font-semibold shzc-text-sm">Shizuha</h3>
             <p className="shzc-text-xs shzc-text-white/70">
               {isLoading ? 'Thinking...' : 'Online'}
             </p>
