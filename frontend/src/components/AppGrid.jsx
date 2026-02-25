@@ -14,6 +14,9 @@ import {
   UserCog,
   Clock,
   Bot,
+  TrendingUp,
+  MessageCircle,
+  LayoutGrid,
   ArrowRight,
 } from 'lucide-react'
 import { cn } from '../utils/cn'
@@ -35,13 +38,15 @@ const ICON_MAP = {
   UserCog,
   Clock,
   Bot,
+  TrendingUp,
+  MessageCircle,
 }
 
 // Services that are always visible in the app grid
 const ALWAYS_VISIBLE = new Set(['admin', 'id'])
 
 function AppCard({ app }) {
-  const IconComponent = ICON_MAP[app.icon]
+  const IconComponent = ICON_MAP[app.icon] || LayoutGrid
 
   return (
     <a
