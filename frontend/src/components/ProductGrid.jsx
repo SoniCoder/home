@@ -11,10 +11,10 @@ export default function ProductGrid({ isAuthenticated = false }) {
         {/* Section header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Everything you need, unified
+            15+ services, all agent-accessible
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            A complete suite of productivity tools that work together seamlessly with a single sign-on.
+            Every service exposes MCP tools for AI agents. Humans use the web UI. Agents use the same APIs. One platform, two interfaces.
           </p>
         </div>
 

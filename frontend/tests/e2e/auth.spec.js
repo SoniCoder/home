@@ -3,16 +3,16 @@ import { test, expect, TEST_USER, clearAuthState } from './fixtures.js'
 /**
  * Authentication tests for Shizuha Home
  *
- * Shizuha Home is unique in that it displays different content based on auth state:
- * - Unauthenticated users: See LandingPage with marketing content
- * - Authenticated users: See HomePage with personalized dashboard
+ * Shizuha Home shows the same landing page content regardless of auth state.
+ * When authenticated, additional sections (WelcomeBanner, AppGrid) appear,
+ * and the Navbar shows user info + logout instead of sign-in/register buttons.
  *
  * The login flow works as follows:
- * 1. User clicks "Sign in" on the landing page
+ * 1. User clicks "Sign in" on the landing page navbar
  * 2. Redirects to /id/login
  * 3. User logs in at Shizuha ID (/id/login)
- * 4. After successful login, redirects to /home/ or /
- * 5. ConditionalHome component shows HomePage
+ * 4. After successful login, redirects to / (home)
+ * 5. Page shows landing content + authenticated sections
  */
 
 test.describe('Authentication', () => {
@@ -30,7 +30,7 @@ test.describe('Authentication', () => {
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
       // Should show landing page hero content
-      await expect(page.locator('h1').filter({ hasText: /One login|All your tools/i }).first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('h1').filter({ hasText: /AI agents for/i }).first()).toBeVisible({ timeout: 10000 })
 
       // Should have sign in link
       await expect(page.locator('a[href="/id/login"]').first()).toBeVisible()
@@ -50,7 +50,7 @@ test.describe('Authentication', () => {
       await expect(page.locator('text=Shizuha').first()).toBeVisible()
     })
 
-    test('should have Products and Features navigation links', async ({ page }) => {
+    test('should have navigation links', async ({ page }) => {
       await page.goto('/home/')
       await page.waitForLoadState('domcontentloaded')
       await clearAuthState(page)
@@ -60,6 +60,17 @@ test.describe('Authentication', () => {
       // Check navigation links (desktop view)
       await expect(page.locator('a[href="#products"]').first()).toBeVisible()
       await expect(page.locator('a[href="#features"]').first()).toBeVisible()
+    })
+
+    test('should NOT show WelcomeBanner when unauthenticated', async ({ page }) => {
+      await page.goto('/home/')
+      await page.waitForLoadState('domcontentloaded')
+      await clearAuthState(page)
+      await page.reload()
+      await page.waitForLoadState('networkidle', { timeout: 15000 })
+
+      // WelcomeBanner should not be visible
+      await expect(page.locator('text=What would you like to work on today?')).not.toBeVisible()
     })
 
   })
@@ -82,8 +93,8 @@ test.describe('Authentication', () => {
       await expect(page.locator('h1')).toContainText('Shizuha ID')
     })
 
-    test('should login with valid credentials and show dashboard', async ({ page }) => {
-      // Start at Shizuha ID login with next parameter
+    test('should login with valid credentials and show dashboard sections', async ({ page }) => {
+      // Start at Shizuha ID login with continue parameter
       await page.goto('/id/login?continue=/')
 
       // Wait for form to be ready
@@ -103,14 +114,16 @@ test.describe('Authentication', () => {
       )
 
       // Wait for redirect to home (handles /home/ or /)
-      await page.waitForURL(/.*home.*|^\/$/, { timeout: 30000 })
+      await page.waitForURL(url => !url.toString().includes('/id/'), { timeout: 30000 })
 
       // Wait for page to load
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
-      // Verify we see the authenticated dashboard content
-      // HomePage shows welcome message with greeting
+      // Verify authenticated sections appear (WelcomeBanner)
       await expect(page.locator('h1').filter({ hasText: /Good (morning|afternoon|evening)/i }).first()).toBeVisible({ timeout: 15000 })
+
+      // Hero content should also be visible (unified page)
+      await expect(page.locator('h1').filter({ hasText: /AI agents for/i }).first()).toBeVisible()
     })
 
     test('should show error with invalid credentials', async ({ page }) => {
@@ -160,11 +173,21 @@ test.describe('Authentication', () => {
       await expect(page.locator('text=What would you like to work on today?')).toBeVisible()
     })
 
-    test('should show logout button', async ({ authenticatedPage }) => {
+    test('should show logout button in navbar', async ({ authenticatedPage }) => {
       const page = authenticatedPage
 
       // There should be a logout button (with LogOut icon)
       await expect(page.locator('button[title="Sign out"]')).toBeVisible({ timeout: 10000 })
+    })
+
+    test('should show hero and capabilities when authenticated', async ({ authenticatedPage }) => {
+      const page = authenticatedPage
+
+      // Hero content should be visible
+      await expect(page.locator('h1').filter({ hasText: /AI agents for/i }).first()).toBeVisible({ timeout: 10000 })
+
+      // Capabilities section should be visible
+      await expect(page.locator('#capabilities')).toBeVisible()
     })
 
     test('should show theme toggle', async ({ authenticatedPage }) => {
@@ -191,7 +214,7 @@ test.describe('Authentication', () => {
     test('should persist authentication across page reload', async ({ authenticatedPage }) => {
       const page = authenticatedPage
 
-      // Verify we're authenticated (see dashboard)
+      // Verify we're authenticated (see WelcomeBanner)
       await expect(
         page.locator('h1').filter({ hasText: /Good (morning|afternoon|evening)/i }).first()
       ).toBeVisible({ timeout: 10000 })
@@ -200,16 +223,16 @@ test.describe('Authentication', () => {
       await page.reload()
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
-      // Should still see dashboard (not landing page)
+      // Should still see WelcomeBanner (auth persisted)
       await expect(
         page.locator('h1').filter({ hasText: /Good (morning|afternoon|evening)/i }).first()
       ).toBeVisible({ timeout: 10000 })
 
-      // Should NOT see landing page content
-      await expect(page.locator('text=One login. All your tools.')).not.toBeVisible()
+      // Logout button should still be in navbar
+      await expect(page.locator('button[title="Sign out"]')).toBeVisible()
     })
 
-    test('should show landing page after logout and clearing state', async ({ authenticatedPage }) => {
+    test('should show unauthenticated state after clearing auth', async ({ authenticatedPage }) => {
       const page = authenticatedPage
 
       // Clear auth state (simulating logout)
@@ -219,8 +242,11 @@ test.describe('Authentication', () => {
       await page.reload()
       await page.waitForLoadState('networkidle', { timeout: 15000 })
 
-      // Should now see landing page
-      await expect(page.locator('h1').filter({ hasText: /One login|All your tools/i }).first()).toBeVisible({ timeout: 10000 })
+      // WelcomeBanner should not be visible
+      await expect(page.locator('text=What would you like to work on today?')).not.toBeVisible()
+
+      // Sign in link should be visible again
+      await expect(page.locator('a[href="/id/login"]').first()).toBeVisible({ timeout: 10000 })
     })
 
   })
@@ -229,7 +255,7 @@ test.describe('Authentication', () => {
 
     test('should authenticate via API fixture', async ({ authenticatedApi }) => {
       // Test that authenticatedApi fixture works - make a request to a protected endpoint
-      const response = await authenticatedApi.get('me/')
+      const response = await authenticatedApi.get('auth/user/')
 
       expect(response.ok()).toBeTruthy()
       const data = await response.json()

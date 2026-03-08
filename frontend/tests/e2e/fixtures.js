@@ -46,7 +46,8 @@ export const test = base.extend({
     )
 
     // Wait for redirect to Home (could be /home/ or just /)
-    await page.waitForURL(/.*home.*|^\/$/, { timeout: 30000 })
+    // Use function matcher since regex ^/$ doesn't match full URLs like http://shizuha-nginx/
+    await page.waitForURL(url => !url.toString().includes('/id/'), { timeout: 30000 })
 
     // Wait for page to fully load and React to hydrate
     await page.waitForLoadState('networkidle', { timeout: 20000 })

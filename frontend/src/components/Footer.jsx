@@ -18,10 +18,16 @@ export default function Footer() {
           {/* Links */}
           <div className="flex items-center gap-6 text-sm">
             <a
+              href="#capabilities"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Agents
+            </a>
+            <a
               href="#products"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
             >
-              Products
+              Services
             </a>
             <a
               href="#features"
@@ -30,16 +36,22 @@ export default function Footer() {
               Features
             </a>
             <a
-              href="/id/account"
+              href="/docs"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
             >
-              Account
+              Docs
+            </a>
+            <a
+              href="/install.sh"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Install
             </a>
           </div>
 
           {/* Copyright */}
           <p className="text-sm text-gray-500 dark:text-gray-500">
-            {currentYear} Shizuha. All rights reserved.
+            {currentYear} Shizuha Trading LLP. All rights reserved.
           </p>
         </div>
       </div>

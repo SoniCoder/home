@@ -1,10 +1,15 @@
 import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
-import { cn } from '../utils/cn'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { isAuthenticated, user } = useAuth()
+
+  const handleLogout = () => {
+    window.location.href = '/id/logout'
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
@@ -23,10 +28,16 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <a
+              href="#capabilities"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Agents
+            </a>
+            <a
               href="#products"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
             >
-              Products
+              Services
             </a>
             <a
               href="#features"
@@ -34,23 +45,58 @@ export default function Navbar() {
             >
               Features
             </a>
+            <a
+              href="/docs"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Docs
+            </a>
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            <a
-              href="/id/login"
-              className="btn-ghost"
-            >
-              Sign in
-            </a>
-            <a
-              href="/id/register"
-              className="btn-primary"
-            >
-              Get Started
-            </a>
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {user?.first_name || user?.username}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {user?.email}
+                    </p>
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-900 flex items-center justify-center">
+                    <span className="text-brand-700 dark:text-brand-300 font-medium">
+                      {(user?.first_name?.[0] || user?.username?.[0] || 'U').toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                  title="Sign out"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/id/login"
+                  className="btn-ghost"
+                >
+                  Sign in
+                </a>
+                <a
+                  href="/id/register"
+                  className="btn-primary"
+                >
+                  Get Started
+                </a>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -76,11 +122,18 @@ export default function Navbar() {
         <div className="md:hidden bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 animate-fade-in">
           <div className="px-4 py-4 space-y-3">
             <a
+              href="#capabilities"
+              className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Agents
+            </a>
+            <a
               href="#products"
               className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Products
+              Services
             </a>
             <a
               href="#features"
@@ -89,19 +142,54 @@ export default function Navbar() {
             >
               Features
             </a>
+            <a
+              href="/docs"
+              className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Docs
+            </a>
             <hr className="border-gray-200 dark:border-gray-800" />
-            <a
-              href="/id/login"
-              className="block w-full btn-ghost text-center"
-            >
-              Sign in
-            </a>
-            <a
-              href="/id/register"
-              className="block w-full btn-primary text-center"
-            >
-              Get Started
-            </a>
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <div className="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-900 flex items-center justify-center">
+                    <span className="text-brand-700 dark:text-brand-300 font-medium">
+                      {(user?.first_name?.[0] || user?.username?.[0] || 'U').toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {user?.first_name || user?.username}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full btn-ghost text-center"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/id/login"
+                  className="block w-full btn-ghost text-center"
+                >
+                  Sign in
+                </a>
+                <a
+                  href="/id/register"
+                  className="block w-full btn-primary text-center"
+                >
+                  Get Started
+                </a>
+              </>
+            )}
           </div>
         </div>
       )}

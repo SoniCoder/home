@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import LandingPage from './pages/LandingPage'
-import HomePage from './pages/HomePage'
+import DocsPage from './pages/DocsPage'
 import { ShizuhaChatWidget } from './components/chat'
 
 function LoadingSpinner() {
@@ -15,14 +15,14 @@ function LoadingSpinner() {
   )
 }
 
-function ConditionalHome() {
-  const { isAuthenticated, isLoading } = useAuth()
+function Home() {
+  const { isLoading } = useAuth()
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  return isAuthenticated ? <HomePage /> : <LandingPage />
+  return <LandingPage />
 }
 
 export default function App() {
@@ -31,7 +31,8 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<ConditionalHome />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/docs" element={<DocsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {isAuthenticated && (
