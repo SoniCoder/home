@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import LandingPage from './pages/LandingPage'
 import DocsPage from './pages/DocsPage'
+import BenchmarksPage from './pages/BenchmarksPage'
 import { ShizuhaChatWidget } from './components/chat'
 
 function LoadingSpinner() {
@@ -33,6 +34,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/docs" element={<DocsPage />} />
+        <Route path="/benchmarks" element={<BenchmarksPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {isAuthenticated && (

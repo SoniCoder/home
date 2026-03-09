@@ -47,6 +47,20 @@ const CAPABILITIES = [
     color: 'text-red-600 dark:text-red-400',
     bgColor: 'bg-red-100 dark:bg-red-900/30',
   },
+  {
+    icon: GitBranch,
+    title: 'Model Fallback Chains',
+    description: 'Ordered list of provider/model pairs per agent. Primary fails? Automatically tries the next. Pins to whichever works.',
+    color: 'text-blue-600 dark:text-blue-400',
+    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+  },
+  {
+    icon: Search,
+    title: 'Multi-Channel',
+    description: 'Agents respond on Telegram, Discord, WhatsApp, and the web dashboard. Same session, any channel. Fan-out keeps everyone in sync.',
+    color: 'text-indigo-600 dark:text-indigo-400',
+    bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+  },
 ]
 
 const AGENT_EXAMPLES = [

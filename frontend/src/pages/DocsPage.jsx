@@ -73,12 +73,16 @@ const TOC = [
   { id: 'exec-mode', title: 'Exec Mode' },
   { id: 'agents', title: 'Agent Configuration' },
   { id: 'providers', title: 'LLM Providers' },
+  { id: 'model-fallbacks', title: 'Model Fallback Chains' },
   { id: 'mcp', title: 'MCP Integration' },
   { id: 'permissions', title: 'Permission Modes' },
   { id: 'configuration', title: 'Configuration' },
   { id: 'gateway', title: 'Multi-Channel Gateway' },
+  { id: 'fan-out', title: 'Fan-Out' },
   { id: 'tools', title: 'Built-in Tools' },
+  { id: 'benchmarks', title: 'Benchmarks' },
   { id: 'api-reference', title: 'HTTP API' },
+  { id: 'file-paths', title: 'File Paths' },
   { id: 'troubleshooting', title: 'Troubleshooting' },
 ]
 
@@ -174,7 +178,7 @@ export default function DocsPage() {
               <P>Install the Shizuha runtime with a single command:</P>
               <CodeBlock
                 title="Terminal"
-                code="curl -fsSL https://s1.tail.shizuha.com/install.sh | bash"
+                code="curl -fsSL http://s1.tail.shizuha.com/install.sh | bash"
               />
               <P>This downloads the CLI, MCP servers, and all dependencies to <InlineCode>~/.shizuha</InlineCode> and
                 adds <InlineCode>shizuha</InlineCode> to your PATH via <InlineCode>~/.local/bin</InlineCode>.</P>
@@ -196,31 +200,24 @@ export default function DocsPage() {
 
             {/* ── Quick Start ── */}
             <Section id="quickstart" title="Quick Start">
-              <P>Get up and running in under 2 minutes:</P>
+              <P>One command installs, starts the daemon, and opens the dashboard:</P>
 
-              <H3>1. Install</H3>
-              <CodeBlock code="curl -fsSL https://s1.tail.shizuha.com/install.sh | bash" />
+              <CodeBlock code="curl -fsSL http://s1.tail.shizuha.com/install.sh | bash" />
+              <P>Dashboard is at <InlineCode>http://localhost:8015</InlineCode>. The daemon auto-starts on boot and restarts on crash.</P>
 
-              <H3>2. Login</H3>
-              <CodeBlock code="shizuha login" />
-              <P>Enter your Shizuha ID username and password. Credentials are saved to <InlineCode>~/.shizuha/auth.json</InlineCode>.</P>
-
-              <H3>3. Start the agent daemon</H3>
-              <CodeBlock code="shizuha up" />
-              <P>This starts a background daemon that manages all your agent runtimes. The dashboard becomes available at <InlineCode>http://localhost:8015</InlineCode>.</P>
-
-              <H3>4. Open the dashboard</H3>
-              <P>Navigate to <a href="http://localhost:8015" className="link">http://localhost:8015</a> in your browser.
-                You'll see all your configured agents. Click on any agent to start chatting.</P>
-
-              <H3>5. Or use the interactive TUI</H3>
-              <CodeBlock code="shizuha" />
-              <P>Launch the terminal UI for a rich interactive experience directly in your terminal.</P>
+              <H3>Authenticate (optional)</H3>
+              <CodeBlock code="shizuha auth codex" />
+              <P>Free with any ChatGPT account. Uses the device code flow — open the link in your browser, enter the code, done.
+                Uses <InlineCode>gpt-5.3-codex</InlineCode> by default. You can switch models anytime with <InlineCode>/model</InlineCode> in the TUI.</P>
 
               <Callout type="tip">
-                You can run <InlineCode>shizuha up</InlineCode> and the TUI simultaneously — they're completely independent.
-                The daemon manages agent runtimes while the TUI is a local coding agent.
+                Other providers are also supported: <InlineCode>export ANTHROPIC_API_KEY=...</InlineCode> for Claude,
+                {' '}<InlineCode>export OPENAI_API_KEY=...</InlineCode> for GPT, or install <a href="https://ollama.com" className="link">Ollama</a> for local models.
               </Callout>
+
+              <H3>Interactive TUI</H3>
+              <CodeBlock code="shizuha" />
+              <P>Launch the interactive TUI for a rich coding agent experience directly in your terminal.</P>
             </Section>
 
             {/* ── Authentication ── */}
@@ -228,7 +225,7 @@ export default function DocsPage() {
               <P>Shizuha uses multiple authentication systems depending on the LLM provider you're connecting to.</P>
 
               <H3>Shizuha ID (Platform login)</H3>
-              <P>Required for the agent daemon and dashboard. Connects to your organization's Shizuha platform.</P>
+              <P>Optional. Connects to your organization's Shizuha platform for shared agents, task management, and MCP servers. The daemon works without login (local mode).</P>
               <CodeBlock title="Login" code="shizuha login" />
               <CodeBlock title="Login (interactive prompt)" code="shizuha login --username myuser" />
               <CodeBlock title="Logout" code="shizuha logout" />
@@ -530,7 +527,7 @@ export default function DocsPage() {
               <H3>Agent properties</H3>
               <P>Each agent is configured with:</P>
               <ul className="list-disc pl-6 space-y-1 text-gray-600 dark:text-gray-400 text-sm">
-                <li><strong>Execution method</strong> — <InlineCode>cli</InlineCode> (Claude Code) or <InlineCode>codex</InlineCode> (OpenAI Codex)</li>
+                <li><strong>Execution method</strong> — <InlineCode>shizuha</InlineCode> (Anthropic models) or <InlineCode>codex</InlineCode> (OpenAI Codex)</li>
                 <li><strong>Model overrides</strong> — Per-task model selection (e.g., use Opus for architecture, Sonnet for code)</li>
                 <li><strong>Skills</strong> — Tagged capabilities like <InlineCode>backend</InlineCode>, <InlineCode>frontend</InlineCode>, <InlineCode>testing</InlineCode></li>
                 <li><strong>Personality traits</strong> — Behavioral style (pragmatic, methodical, creative, etc.)</li>
@@ -598,6 +595,39 @@ export default function DocsPage() {
                 with automatic failover on errors. Codex supports multiple ChatGPT accounts with rate-limit-aware rotation.</P>
             </Section>
 
+            {/* ── Model Fallback Chains ── */}
+            <Section id="model-fallbacks" title="Model Fallback Chains">
+              <P>Each agent can have an ordered list of (execution method, model) pairs. When the primary model fails
+                (rate limit, server error, auth failure, connection issue), the runtime automatically tries the next model
+                in the chain and <strong>pins</strong> to whichever succeeds.</P>
+
+              <H3>How it works</H3>
+              <ol className="list-decimal pl-6 space-y-1 text-gray-600 dark:text-gray-400 text-sm">
+                <li>Agent starts with the <strong>primary</strong> model (first entry in the chain)</li>
+                <li>If it fails, tries each <strong>fallback</strong> in order</li>
+                <li>Pins to whichever succeeds for subsequent turns and messages</li>
+                <li>If the pinned model later fails, restarts the chain from the beginning</li>
+                <li>Per-message model overrides bypass the chain entirely</li>
+              </ol>
+
+              <H3>Configuration</H3>
+              <P>Configure in the dashboard under <strong>Settings → Agents → (expand agent) → Model Chain</strong>.
+                Each entry has an execution method and model. Drag to reorder priority.</P>
+              <CodeBlock code={`Priority 1 (primary):  shizuha  →  claude-opus-4-6
+Priority 2 (fallback): codex    →  gpt-5.3-codex
+Priority 3 (fallback): shizuha  →  claude-sonnet-4-6`} title="Example fallback chain" />
+
+              <H3>Fallback events</H3>
+              <P>When a fallback occurs, a <InlineCode>model_fallback</InlineCode> event is emitted on all channels.
+                In the dashboard chat, this appears as a blockquote:
+                <em> "Model fallback: claude-opus-4-6 failed, switching to gpt-5.3-codex"</em></P>
+
+              <Callout type="tip">
+                Combine fallback chains with Codex multi-account rotation for maximum resilience. If all Codex accounts
+                are rate-limited, the agent automatically falls through to a Claude or Gemini fallback.
+              </Callout>
+            </Section>
+
             {/* ── MCP ── */}
             <Section id="mcp" title="MCP Integration">
               <P>Shizuha has full support for the <a href="https://modelcontextprotocol.io" className="link" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>,
@@ -605,7 +635,7 @@ export default function DocsPage() {
 
               <H3>Supported transports</H3>
               <ul className="list-disc pl-6 space-y-1 text-gray-600 dark:text-gray-400 text-sm">
-                <li><strong>stdio</strong> — Subprocess communication (most common, Claude Code compatible)</li>
+                <li><strong>stdio</strong> — Subprocess communication (most common, works with any MCP-compatible client)</li>
                 <li><strong>SSE</strong> — Server-Sent Events for long-running daemons</li>
                 <li><strong>Streamable HTTP</strong> — HTTP with chunked streaming</li>
                 <li><strong>WebSocket</strong> — Bidirectional real-time</li>
@@ -826,7 +856,48 @@ file = "~/.shizuha/shizuha.log"`} />
 
               <H3>Cross-channel fan-out</H3>
               <P>When an agent responds on one channel, the response can be broadcast to other channels.
-                Configure in the dashboard under <strong>Settings → Fan-out</strong>. WhatsApp is off by default due to per-message costs.</P>
+                Configure in the dashboard under <strong>Settings → Fan-out</strong>. See the <a href="#fan-out" className="link">Fan-out section</a> for details.</P>
+            </Section>
+
+            {/* ── Fan-Out ── */}
+            <Section id="fan-out" title="Fan-Out">
+              <P>Fan-out broadcasts agent events to all connected channels when the agent responds on any single channel.
+                This ensures the agent's work is visible everywhere — start a conversation on Telegram, see the response
+                appear in the dashboard and Discord simultaneously.</P>
+
+              <H3>Per-channel defaults</H3>
+              <table className="w-full text-sm my-4 border-collapse">
+                <thead><tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Channel</th>
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Default</th>
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Notes</th>
+                </tr></thead>
+                <tbody className="text-gray-600 dark:text-gray-400">
+                  {[
+                    ['Web Dashboard', 'On', 'Always see agent activity'],
+                    ['Shizuha WS', 'On', 'Platform WebSocket clients'],
+                    ['Telegram', 'On', 'Broadcast to Telegram chat'],
+                    ['Discord', 'On', 'Broadcast to Discord channel'],
+                    ['WhatsApp', 'Off', 'Per-message cost — opt-in only'],
+                    ['Slack', 'On', '—'],
+                    ['CLI', 'Off', 'Terminal sessions are ephemeral'],
+                  ].map(([ch, def, note]) => (
+                    <tr key={ch} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-2">{ch}</td>
+                      <td className="py-2"><InlineCode>{def}</InlineCode></td>
+                      <td className="py-2">{note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <P>Toggle fan-out per channel type in the dashboard under <strong>Settings → Fan-out</strong>, or via the
+                daemon API at <InlineCode>PATCH /v1/settings</InlineCode>.</P>
+
+              <Callout type="warning">
+                WhatsApp is off by default because WhatsApp Business API charges per message sent. Enable only if you
+                want agents to proactively notify via WhatsApp.
+              </Callout>
             </Section>
 
             {/* ── Built-in Tools ── */}
@@ -959,6 +1030,77 @@ DELETE /v1/providers/codex/accounts/:email        # Remove account`} />
 {"type": "message_ack", "execution_id": "uuid"}
 {"type": "content", "content": "Hi there!", "execution_id": "uuid"}
 {"type": "complete", "execution_id": "uuid"}`} />
+            </Section>
+
+            {/* ── Benchmarks ── */}
+            <Section id="benchmarks" title="Benchmarks">
+              <P>Shizuha Agent achieves <strong>87.0%</strong> on <a href="https://www.swebench.com/" className="link" target="_blank" rel="noopener noreferrer">SWE-bench Verified</a> — resolving 435 out of 500 real-world GitHub issues.</P>
+
+              <table className="w-full text-sm my-4 border-collapse">
+                <thead><tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Rank</th>
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Agent</th>
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Score</th>
+                </tr></thead>
+                <tbody className="text-gray-600 dark:text-gray-400">
+                  {[
+                    ['#1', 'Shizuha (gpt-5.3-codex)', '87.0%'],
+                    ['#2', 'Claude Opus 4.5 (official)', '80.9%'],
+                    ['#3', 'Claude Opus 4.6 (official)', '80.8%'],
+                    ['#4', 'Gemini 3.1 Pro', '80.6%'],
+                    ['#5', 'MiniMax M2.5', '80.2%'],
+                    ['#6', 'GPT-5.2', '80.0%'],
+                  ].map(([rank, agent, score]) => (
+                    <tr key={rank} className={`border-b border-gray-100 dark:border-gray-800 ${rank === '#1' ? 'font-semibold text-gray-900 dark:text-white' : ''}`}>
+                      <td className="py-2">{rank}</td>
+                      <td className="py-2">{agent}</td>
+                      <td className="py-2">{score}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <Callout type="info">
+                Methodology: Best-of-k across 24 evaluation runs with gpt-5.3-codex (xhigh reasoning, autonomous mode,
+                45-min timeout per instance). Public leaderboard scores are typically pass@1.
+                See <a href="http://s1.tail.shizuha.com/benchmarks" className="link" target="_blank" rel="noopener noreferrer">full benchmark details</a> for transparency notes.
+              </Callout>
+            </Section>
+
+            {/* ── File Paths ── */}
+            <Section id="file-paths" title="File Paths">
+              <P>All Shizuha data is stored under <InlineCode>~/.shizuha/</InlineCode>.</P>
+
+              <table className="w-full text-sm my-4 border-collapse">
+                <thead><tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Path</th>
+                  <th className="text-left py-2 font-medium text-gray-900 dark:text-white">Description</th>
+                </tr></thead>
+                <tbody className="text-gray-600 dark:text-gray-400">
+                  {[
+                    ['~/.shizuha/config.toml', 'Global configuration'],
+                    ['~/.shizuha/auth.json', 'Platform authentication'],
+                    ['~/.shizuha/credentials.json', 'Provider credentials (Codex accounts, API keys)'],
+                    ['~/.shizuha/daemon.log', 'Daemon log output'],
+                    ['~/.shizuha/daemon.state.json', 'Daemon process state (PID, agents)'],
+                    ['~/.shizuha/agents.enabled', 'Persisted agent enable/disable state'],
+                    ['~/.shizuha/agents/{username}/agent.toml', 'Per-agent model/config overrides'],
+                    ['~/.shizuha/agents/{username}/CLAUDE.md', 'Per-agent system instructions'],
+                    ['~/.shizuha/agents/{username}/state.db', 'Per-agent session SQLite DB'],
+                    ['~/.local/bin/shizuha', 'Binary symlink'],
+                  ].map(([path, desc]) => (
+                    <tr key={path} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-2"><InlineCode>{path}</InlineCode></td>
+                      <td className="py-2">{desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <Callout type="warning">
+                <InlineCode>rm -rf ~/.shizuha</InlineCode> deletes all credentials, session history, and daemon state.
+                You will need to reconfigure everything from scratch.
+              </Callout>
             </Section>
 
             {/* ── Troubleshooting ── */}

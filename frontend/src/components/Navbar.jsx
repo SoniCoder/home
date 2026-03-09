@@ -51,6 +51,12 @@ export default function Navbar() {
             >
               Docs
             </a>
+            <a
+              href="/benchmarks"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Benchmarks
+            </a>
           </div>
 
           {/* Desktop Actions */}
@@ -148,6 +154,13 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Docs
+            </a>
+            <a
+              href="/benchmarks"
+              className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Benchmarks
             </a>
             <hr className="border-gray-200 dark:border-gray-800" />
             {isAuthenticated ? (

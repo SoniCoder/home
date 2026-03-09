@@ -1,8 +1,39 @@
-import { ArrowRight, Terminal, Copy, Check, LayoutGrid, BookOpen } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, Terminal, Copy, Check, LayoutGrid, BookOpen, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
-const INSTALL_CMD = 'curl -fsSL https://s1.tail.shizuha.com/install.sh | bash'
+// ── Platform install commands ────────────────────────────────────────
+
+const PLATFORMS = [
+  {
+    id: 'macos',
+    label: 'macOS',
+    prompt: '$',
+    cmd: 'curl -fsSL http://s1.tail.shizuha.com/install.sh | bash',
+  },
+  {
+    id: 'linux',
+    label: 'Linux',
+    prompt: '$',
+    cmd: 'curl -fsSL http://s1.tail.shizuha.com/install.sh | bash',
+  },
+  {
+    id: 'windows',
+    label: 'Windows',
+    prompt: '>',
+    cmd: 'irm http://s1.tail.shizuha.com/install.ps1 | iex',
+  },
+]
+
+function detectPlatform() {
+  if (typeof navigator === 'undefined') return 'linux'
+  const ua = navigator.userAgent.toLowerCase()
+  if (ua.includes('win')) return 'windows'
+  if (ua.includes('mac')) return 'macos'
+  return 'linux'
+}
+
+// ── Copy button ──────────────────────────────────────────────────────
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false)
@@ -27,6 +58,77 @@ function CopyButton({ text }) {
     </button>
   )
 }
+
+// ── Platform-tabbed install box ──────────────────────────────────────
+
+function InstallCommand() {
+  const [active, setActive] = useState(() => detectPlatform())
+  const platform = PLATFORMS.find((p) => p.id === active) ?? PLATFORMS[1]
+
+  return (
+    <div className="rounded-xl bg-gray-900 dark:bg-black border border-gray-700 dark:border-gray-800 overflow-hidden shadow-2xl">
+      {/* Tab bar + traffic lights */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-gray-800 dark:bg-gray-900 border-b border-gray-700 dark:border-gray-800">
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-500/80" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+            <div className="w-3 h-3 rounded-full bg-green-500/80" />
+          </div>
+          {/* Platform tabs */}
+          <div className="flex gap-0.5 ml-2">
+            {PLATFORMS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setActive(p.id)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  active === p.id
+                    ? 'bg-gray-700 dark:bg-gray-800 text-white'
+                    : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <CopyButton text={platform.cmd} />
+      </div>
+      {/* Command */}
+      <div className="px-4 py-4 font-mono text-sm sm:text-base text-left">
+        <span className="text-green-400">{platform.prompt}</span>{' '}
+        <span className="text-gray-300">{platform.cmd}</span>
+      </div>
+    </div>
+  )
+}
+
+// ── Quick start expandable ───────────────────────────────────────────
+
+function QuickStartSteps() {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="text-left">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+      >
+        <span className="font-medium">What does this do?</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+      {expanded && (
+        <div className="px-4 pb-3 text-sm text-gray-500 dark:text-gray-400 space-y-1.5">
+          <p>Downloads a self-contained binary (Node.js bundled), starts the daemon as a system service, and opens the dashboard at <span className="text-cyan-400 font-mono text-xs">localhost:8015</span>.</p>
+          <p>Works on Linux (systemd), macOS (launchd), Docker, Termux, WSL, and more. No dependencies required.</p>
+          <p className="text-gray-600 dark:text-gray-500 text-xs">Auto-starts on boot. Auto-restarts on crash. Run <span className="font-mono">shizuha down</span> to stop.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Hero section ─────────────────────────────────────────────────────
 
 export default function Hero() {
   const { isAuthenticated } = useAuth()
@@ -65,27 +167,14 @@ export default function Hero() {
           One CLI. Full agentic workflows.
         </p>
 
-        {/* Install command */}
-        <div className="max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-          <div className="rounded-xl bg-gray-900 dark:bg-black border border-gray-700 dark:border-gray-800 overflow-hidden shadow-2xl">
-            {/* Terminal header */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-gray-800 dark:bg-gray-900 border-b border-gray-700 dark:border-gray-800">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                </div>
-                <span className="text-xs text-gray-500 ml-2 font-mono">Terminal</span>
-              </div>
-              <CopyButton text={INSTALL_CMD} />
-            </div>
-            {/* Command */}
-            <div className="px-4 py-4 font-mono text-sm sm:text-base text-left">
-              <span className="text-green-400">$</span>{' '}
-              <span className="text-gray-300">{INSTALL_CMD}</span>
-            </div>
-          </div>
+        {/* Install command with platform tabs */}
+        <div className="max-w-2xl mx-auto mb-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+          <InstallCommand />
+        </div>
+
+        {/* What does this do? */}
+        <div className="max-w-2xl mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+          <QuickStartSteps />
         </div>
 
         {/* CTAs */}
